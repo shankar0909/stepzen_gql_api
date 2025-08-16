@@ -1,11 +1,18 @@
-type User {
+type UserEntry {
+  address: String
+  company: String
+  country: String
+  email: String
   id: Int
   name: String
-  company: String
+  phone: String
+  photo: String
+  state: String
   username: String
+  zip: String
 }
-    
 
 type Query {
-  users: [User] @rest(endpoint: "https://fake-json-api.mock.beeceptor.com/users", configuration: "api")
+  users: [UserEntry]
+    @rest(endpoint: "https://fake-json-api.mock.beeceptor.com/users")
 }

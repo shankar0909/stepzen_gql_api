@@ -1,4 +1,4 @@
 configurationset:
-  - configuration:
-      name: api
-      configuration: rest_backend
+- configuration:
+    name: api
+    configuration: rest_backend

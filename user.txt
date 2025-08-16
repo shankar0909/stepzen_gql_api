@@ -1,6 +1,0 @@
-type User {
-  id: Int
-  name: String
-  company: String
-  username: String
-}
