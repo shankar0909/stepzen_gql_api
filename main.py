@@ -26,24 +26,15 @@ STEPZEN_ACCOUNT = ""            # 🔹 IBM account name
 STEPZEN_ADMINKEY = ""              # 🔹 IBM admin key
 GRAPHQL_SOURCE = "schema/index.graphql"        # Path to your GraphQL schema
 GRAPHQL_DEST = "index.graphql"  
-BASE_FOLDER = "{YOUR BASE DIR}"
+BASE_FOLDER = "{YOUR BASE FOLDER}"
 # ======================
 
 
-def ensure_graphql():
-    """Ensure index.graphql exists at StepZen root."""
-    source = pathlib.Path(GRAPHQL_SOURCE)
-    dest = pathlib.Path(GRAPHQL_DEST)
-    if not source.exists():
-        raise FileNotFoundError(f"[ERROR] GraphQL schema not found at {GRAPHQL_SOURCE}")
-    shutil.copy(source, dest)
-    print(f"[INFO] Copied {GRAPHQL_SOURCE} to {GRAPHQL_DEST}")
-
-def clean_cache():
+def clean_schema():
     """Delete old StepZen cache to prevent stale configurations."""
-    stepzen_cache = pathlib.Path(".stepzen")
-    if stepzen_cache.exists():
-        shutil.rmtree(stepzen_cache)
+    schema = pathlib.Path("schema")
+    if schema.exists():
+        shutil.rmtree(schema)
         print("[INFO] Cleared old StepZen cache")
 
 def stepzen_login():
@@ -70,40 +61,10 @@ domain: {STEPZEN_DOMAIN}
     subprocess.run(["stepzen", "whoami"], check=True)
 
 
-def write_config():
-    """Write IBM-compliant config.yaml in the requested nested format."""
-    config_content = (
-        "configurationset:\n"
-        "  - configuration:\n"
-        "      name: api\n"
-        "      configuration: rest_backend\n"
-    )
-    with open("config.yaml", "w", encoding="utf-8") as f:
-        f.write(config_content)
-    print("[INFO] IBM-compliant nested config.yaml written")
-
-
-def write_graphql_schema(rest_url):
-    with open('user.txt', 'r') as file:
-        content = file.read()
-
-    """Create StepZen GraphQL schema mapping REST endpoint."""
-    graphql_content =  content + f"""
-    
-
-type Query {{
-  users: [User] @rest(endpoint: "{rest_url}", configuration: "api")
-}}
-"""
-    os.makedirs("schema", exist_ok=True)
-    with open("schema/index.graphql", "w") as f:
-        f.write(graphql_content.strip())
-    print("[INFO] Created schema/index.graphql")
-
 def deploy_stepzen():
     """Deploy API to IBM StepZen."""
     print(f"[INFO] Deploying {API_NAME} to IBM StepZen...")
-    subprocess.run(["stepzen", "deploy", API_NAME], check=True)
+    subprocess.run(["stepzen", "deploy", API_NAME, "--dir",BASE_FOLDER+"/schema"], check=True)
     print("[INFO] Deployment finished.")
 
 
@@ -131,16 +92,14 @@ def write_config(source_type, connection, output_dir=None, query_name=None, quer
     """
     if output_dir is None:
         output_dir = os.getcwd()  # default to current dir as workspace root
-    subprocess.run(["stepzen", "init", output_dir], check=True)
-    # Ensure workspace exists
-   # ensure_workspace(output_dir)
 
-    # Build StepZen import command
-    # if source_type.lower() == "rest":
-    #     cmd = ["stepzen", "import", f"curl {connection}", "--dir", output_dir]
-    # else:
-    #     cmd = ["stepzen", "import", source_type, connection, "--dir", output_dir]
+    # Stepzen init    
+    init_stepzen()
 
+    # Stepzen login
+    stepzen_login ()
+
+    # Stepzen import
     cmd = ["stepzen", "import"]
     if source_type.lower() == "rest":
         if not query_name or not query_type or not name:
@@ -207,9 +166,7 @@ def ensure_workspace(output_dir):
         print(f"[INFO] Workspace initialized at {output_dir}")
 
 def main():
-    clean_cache()         # Remove old workspace metadata
-    init_stepzen()       # Initialize StepZen workspace
-    stepzen_login()       # Write IBM credentials
+    clean_schema()
     write_config(
     source_type="rest",
     connection=REST_ENDPOINT,
@@ -218,9 +175,6 @@ def main():
     query_type="User",
     name="schema"
 )
-    #write_config()        # Create config.yaml with default 'api'
-    #write_graphql_schema(REST_ENDPOINT)  # Create GraphQL schema
-    ensure_graphql()      # Ensure index.graphql exists
     deploy_stepzen()      # Deploy API
     start_stepzen()       # Start API locally
 

@@ -1,18 +1,3 @@
-type UserEntry {
-  address: String
-  company: String
-  country: String
-  email: String
-  id: Int
-  name: String
-  phone: String
-  photo: String
-  state: String
-  username: String
-  zip: String
-}
-
-type Query {
-  users: [UserEntry]
-    @rest(endpoint: "https://fake-json-api.mock.beeceptor.com/users")
+schema @sdl(files: ["schema/index.graphql"]) {
+  query: Query
 }
