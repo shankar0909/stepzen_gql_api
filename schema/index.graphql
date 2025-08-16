@@ -1,0 +1,11 @@
+type User {
+  id: Int
+  name: String
+  company: String
+  username: String
+}
+    
+
+type Query {
+  users: [User] @rest(endpoint: "https://fake-json-api.mock.beeceptor.com/users", configuration: "api")
+}
