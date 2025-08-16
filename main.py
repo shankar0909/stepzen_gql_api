@@ -1,16 +1,9 @@
-
 import os
 import subprocess
 import pathlib
 import shutil
 import yaml
 
-# =========================
-# CONFIGURATION
-# =========================
-CONFIG_NAME = "api"                             # Must use IBM default 'api'
-GRAPHQL_FILE = "schema/index.graphql"          # Path to your GraphQL schema
-# =========================
 
 # === CONFIGURATION ===
 API_NAME = "GQL/my_first_stepzen"
@@ -18,17 +11,16 @@ REST_ENDPOINT = "https://fake-json-api.mock.beeceptor.com/users"
 HEADERS = {
     "Authorization": "Bearer DUMMY_TOKEN"
 }
-
-
-# === CONFIGURATION ===
 STEPZEN_DOMAIN = "us-east-a.ibm.stepzen.net"   # 🔹 Replace with your IBM StepZen domain
 STEPZEN_ACCOUNT = ""            # 🔹 IBM account name
-STEPZEN_ADMINKEY = ""              # 🔹 IBM admin key
-GRAPHQL_SOURCE = "schema/index.graphql"        # Path to your GraphQL schema
-GRAPHQL_DEST = "index.graphql"  
-BASE_FOLDER = "{YOUR BASE FOLDER}"
+STEPZEN_ADMINKEY = ""  # 🔹 IBM admin key
+BASE_FOLDER = "{YOUR WORKSPACE DIR}"
 # ======================
 
+def start_stepzen():
+    """Start StepZen API locally."""
+    print("[INFO] Starting StepZen API locally in current directory...")
+    subprocess.run(["stepzen", "start"], check=True)
 
 def clean_schema():
     """Delete old StepZen cache to prevent stale configurations."""
@@ -37,7 +29,7 @@ def clean_schema():
         shutil.rmtree(schema)
         print("[INFO] Cleared old StepZen cache")
 
-def stepzen_login():
+def login_stepzen():
     """Login for IBM-managed StepZen by writing credentials directly."""
     creds_path = pathlib.Path.home() / ".stepzen" / "credentials"
     creds_path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,13 +52,11 @@ domain: {STEPZEN_DOMAIN}
     # Verify login
     subprocess.run(["stepzen", "whoami"], check=True)
 
-
 def deploy_stepzen():
     """Deploy API to IBM StepZen."""
     print(f"[INFO] Deploying {API_NAME} to IBM StepZen...")
     subprocess.run(["stepzen", "deploy", API_NAME, "--dir",BASE_FOLDER+"/schema"], check=True)
     print("[INFO] Deployment finished.")
-
 
 def init_stepzen():
     """Initialize StepZen workspace if missing."""
@@ -76,16 +66,7 @@ def init_stepzen():
     else:
         print("[INFO] StepZen workspace already exists.")
 
-
-
-def start_stepzen():
-    """Start StepZen API locally."""
-    print("[INFO] Starting StepZen API locally in current directory...")
-    subprocess.run(["stepzen", "start"], check=True)
-
-
-
-def write_config(source_type, connection, output_dir=None, query_name=None, query_type=None, name=None):
+def import_stepzen(source_type, connection, output_dir=None, query_name=None, query_type=None, name=None):
     """
     Dynamically run StepZen import for REST or DB/GraphQL sources
     and write IBM-compliant config.yaml in the workspace root.
@@ -97,7 +78,7 @@ def write_config(source_type, connection, output_dir=None, query_name=None, quer
     init_stepzen()
 
     # Stepzen login
-    stepzen_login ()
+    login_stepzen ()
 
     # Stepzen import
     cmd = ["stepzen", "import"]
@@ -158,25 +139,17 @@ def write_config(source_type, connection, output_dir=None, query_name=None, quer
     return schema_files
 
 
-def ensure_workspace(output_dir):
-    """Ensure the StepZen workspace exists; create it if missing."""
-    if not os.path.isdir(os.path.join(output_dir, ".stepzen")):
-        print(f"[INFO] StepZen workspace not found in {output_dir}, initializing...")
-        subprocess.run(["stepzen", "init", output_dir], check=True)
-        print(f"[INFO] Workspace initialized at {output_dir}")
-
 def main():
     clean_schema()
-    write_config(
+    import_stepzen(
     source_type="rest",
     connection=REST_ENDPOINT,
     output_dir=BASE_FOLDER,
-    query_name="users",
-    query_type="User",
+    query_name="users",  # Name of the query in GraphQL schema
+    query_type="User",  # Type of the query in GraphQL schema
     name="schema"
 )
     deploy_stepzen()      # Deploy API
-    start_stepzen()       # Start API locally
 
 if __name__ == "__main__":
     main()
