@@ -12,8 +12,8 @@ HEADERS = {
     "Authorization": "Bearer DUMMY_TOKEN"
 }
 STEPZEN_DOMAIN = "us-east-a.ibm.stepzen.net"   # 🔹 Replace with your IBM StepZen domain
-STEPZEN_ACCOUNT = ""            # 🔹 IBM account name
-STEPZEN_ADMINKEY = ""  # 🔹 IBM admin key
+STEPZEN_ACCOUNT = "nifukiu"            # 🔹 IBM account name
+STEPZEN_ADMINKEY = "nifukiu::local.net+1000::c59c8a5edf9b9e6bd2e38d9b97a902bf1fdb2b29426b73cb0333627147b1efa2"  # 🔹 IBM admin key
 ROOT_FOLDER = "/Users/shankarsharma/Desktop/GQL/stepzen_gql_api"
 # ======================
 
