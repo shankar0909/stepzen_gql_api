@@ -6,4 +6,6 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "pyyaml>=6.0.2",
+    "tomlkit>=0.13.3",
+    "zeep>=4.3.1",
 ]
